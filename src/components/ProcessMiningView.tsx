@@ -34,34 +34,65 @@ export const ProcessMiningView: React.FC<ProcessMiningViewProps> = ({ lang }) =>
 
   const [analytics, setAnalytics] = useState<ProcessAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<TraceVariant | null>(null);
 
-  useEffect(() => {
-    async function fetchAnalytics() {
-      try {
-        setLoading(true);
-        const res = await fetch('/api/process-analytics');
-        if (res.ok) {
-          const data: ProcessAnalytics = await res.json();
-          setAnalytics(data);
-          if (data.traceVariants.length > 0) {
-            setSelectedVariant(data.traceVariants[0]);
-          }
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch('/api/process-analytics');
+      if (res.ok) {
+        const data: ProcessAnalytics = await res.json();
+        setAnalytics(data);
+        if (data.traceVariants.length > 0) {
+          setSelectedVariant(data.traceVariants[0]);
         }
-      } catch (err) {
-        console.error('Failed to load process analytics', err);
-      } finally {
-        setLoading(false);
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        setError(errJson.error || 'Failed to load process mining analytics');
       }
+    } catch (err: any) {
+      console.error('Failed to load process analytics', err);
+      setError(err.message || 'Network error connecting to Process Mining engine');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchAnalytics();
   }, []);
 
-  if (loading || !analytics) {
+  if (loading) {
     return (
-      <div className="p-12 text-center rounded-xl border border-slate-200 bg-white">
+      <div className="p-12 text-center rounded-xl border border-slate-200 bg-white shadow-xs">
         <GitBranch className="w-8 h-8 text-[#D71921] animate-spin mx-auto mb-2" />
-        <p className="text-xs text-slate-500">Mining 5,453 synthetic process events across 820 cases...</p>
+        <p className="text-xs text-slate-500 font-medium">
+          {isAr
+            ? 'جاري تحليل وتعدين ٥،٤٥٣ حدثاً تنظيمياً عبر ٨٢٠ معاملة...'
+            : 'Correlating 5,453 synthetic process events across 820 cases...'}
+        </p>
+      </div>
+    );
+  }
+
+  if (error || !analytics) {
+    return (
+      <div className="p-12 text-center rounded-xl border border-rose-200 bg-rose-50/50 space-y-3">
+        <AlertTriangle className="w-8 h-8 text-rose-600 mx-auto" />
+        <h3 className="text-sm font-bold text-rose-900">
+          {isAr ? 'تعذر تحميل تحليلات تعدين العمليات' : 'Failed to Load Process Mining Telemetry'}
+        </h3>
+        <p className="text-xs text-rose-700 max-w-md mx-auto">
+          {error || (isAr ? 'لم يتم استرجاع بيانات سجل الأحداث.' : 'No process analytics data returned.')}
+        </p>
+        <button
+          onClick={fetchAnalytics}
+          className="px-4 py-2 bg-[#D71921] text-white rounded-lg text-xs font-semibold hover:bg-[#b5141b] transition-all cursor-pointer shadow-xs"
+        >
+          {isAr ? 'إعادة المحاولة الآن' : 'Retry Process Analysis'}
+        </button>
       </div>
     );
   }

@@ -9,6 +9,9 @@ import {
   TransitionLatency
 } from '../types.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 let cachedAnalytics: ProcessAnalytics | null = null;
 
 export function loadAndAnalyzeEventLog(): ProcessAnalytics {
