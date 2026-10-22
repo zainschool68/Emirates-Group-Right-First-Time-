@@ -1,0 +1,62 @@
+[
+  {
+    "id": "RULE-01",
+    "code": "JUSTIFICATION_LENGTH",
+    "name": "Minimum Justification Rigor",
+    "description": "Business justification must contain at least 15 characters articulating operational requirement.",
+    "severity": "CRITICAL_BLOCKER",
+    "applicableRequestTypes": ["Lateral Transfer", "Promotion", "New Position", "End of Service", "Position Deletion"],
+    "field": "businessJustification",
+    "minChars": 15
+  },
+  {
+    "id": "RULE-02A",
+    "code": "LATERAL_GRADE_EQUALITY",
+    "name": "Lateral Transfer Grade Consistency",
+    "description": "Lateral Transfer target position grade must strictly match current grade.",
+    "severity": "CRITICAL_BLOCKER",
+    "applicableRequestTypes": ["Lateral Transfer"],
+    "field": "targetGrade",
+    "condition": "targetGrade == currentGrade"
+  },
+  {
+    "id": "RULE-02B",
+    "code": "PROMOTION_GRADE_INCREASE",
+    "name": "Promotion Grade Ascension",
+    "description": "Promotion target grade must be strictly higher than current employee grade.",
+    "severity": "CRITICAL_BLOCKER",
+    "applicableRequestTypes": ["Promotion"],
+    "field": "targetGrade",
+    "condition": "targetGrade > currentGrade"
+  },
+  {
+    "id": "RULE-03",
+    "code": "BUDGET_APPROVAL_REQUIRED",
+    "name": "Budgetary Authorization Enforcement",
+    "description": "New Position creation and Promotions strictly require verified budget approval (has_budget_approval = true).",
+    "severity": "CRITICAL_BLOCKER",
+    "applicableRequestTypes": ["New Position", "Promotion"],
+    "field": "hasBudgetApproval",
+    "condition": "hasBudgetApproval == true"
+  },
+  {
+    "id": "RULE-04",
+    "code": "EMPLOYEE_IDENTIFIER_REQUIRED",
+    "name": "Valid Emirates Group Employee Identification",
+    "description": "Transfers and promotions strictly require a valid, active employee ID (e.g., EK-XXXXX).",
+    "severity": "CRITICAL_BLOCKER",
+    "applicableRequestTypes": ["Lateral Transfer", "Promotion", "End of Service"],
+    "field": "employeeId",
+    "condition": "employeeId != null && employeeId.length >= 4"
+  },
+  {
+    "id": "RULE-05",
+    "code": "GRADE_LEAP_GOVERNANCE",
+    "name": "Executive Grade Leap Governance",
+    "description": "Promotions exceeding 2 grade bands require Senior VP Human Resources endorsement and additional justification.",
+    "severity": "WARNING",
+    "applicableRequestTypes": ["Promotion"],
+    "field": "gradeDelta",
+    "condition": "targetGrade - currentGrade <= 2"
+  }
+]
